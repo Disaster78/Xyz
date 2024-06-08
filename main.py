@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = 'MTI0ODk0NjIwNDcwOTIyNDQ1OA.Gblwck.3Tcsl2q5ocutQkgvB4u7-ET-eiC4EZQWXBuo2Q'
+TOKEN = os.environ['TOKEN']
 
 # Target channel ID where embeds are sent
 CHANNEL2_ID = 1203597259774885908  # Channel where embeds are sent
@@ -10,13 +10,13 @@ CHANNEL2_ID = 1203597259774885908  # Channel where embeds are sent
 # Custom emoji details and the required number of reactions
 CUSTOM_EMOJI_NAME = 'upvote'  # The name of the custom emoji
 CUSTOM_EMOJI_ID = 1203698304001777714  # The ID of the custom emoji
-TARGET_REACTION_COUNT = 4  # Number of reactions required
+TARGET_REACTION_COUNT = 1  # Number of reactions required
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='.', intents=intents)
 
 def get_custom_emoji(bot, emoji_name, emoji_id):
     return discord.utils.get(bot.emojis, name=emoji_name, id=emoji_id)
@@ -42,7 +42,6 @@ async def on_raw_reaction_add(payload):
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
             # Prepare the embed
             embed = discord.Embed(
-                title="Message Reached Reaction Threshold",
                 description=f"[Jump to message]({message.jump_url})",
                 color=discord.Color.white()
             )
