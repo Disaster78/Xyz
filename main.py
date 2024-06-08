@@ -53,9 +53,31 @@ async def on_raw_reaction_add(payload):
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
             # Check if a message has already been sent for this message ID
-            if payload.message_id in messages_sent:
+            existing_message_id = messages_sent.get(payload.message_id)
+            if existing_message_id is not None:
+                try:
+                    # Retrieve the existing message
+                    existing_message = await channel.fetch_message(existing_message_id)
+                except discord.NotFound:
+                    logger.error("Existing message not found. Message likely deleted.")
+                    return
+                
+                # Update the existing message
+                embed = existing_message.embeds[0]  # Get the existing embed
+                embed.set_footer(
+                    text=f"Message sent at {message.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+                )
+                
+                # Check for attachments
+                if message.attachments:
+                    # Get the first attachment and set it as the image in the embed
+                    attachment = message.attachments[0]
+                    embed.set_image(url=attachment.url)
+                
+                # Edit the message
+                await existing_message.edit(embed=embed)
                 return
-
+            
             # Wait for a short delay to allow for reaction count updates
             await asyncio.sleep(5)  # Adjust the delay time as needed
             
@@ -63,12 +85,6 @@ async def on_raw_reaction_add(payload):
             message = await channel.fetch_message(payload.message_id)
             reaction = discord.utils.get(message.reactions, emoji=custom_emoji)
             if reaction and reaction.count >= TARGET_REACTION_COUNT:
-                try:
-                    # Retrieve the existing message
-                    existing_message = await channel.fetch_message(messages_sent[payload.message_id])
-                except discord.NotFound:
-                    pass  # Message not found, proceed to send new message
-                
                 # Prepare the embed
                 embed = discord.Embed(
                     description=message.content,
@@ -90,7 +106,9 @@ async def on_raw_reaction_add(payload):
                 
                 # Send the message with the emoji and reaction count along with the embed
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                sent_message = await target_channel.send(embed=embed)
+                reaction_info = f"**{reaction.emoji} {reaction.count}** in #{channel.name}"
+                content = f"{reaction_info}\n{message.jump_url}"
+                sent_message = await target_channel.send(content=content, embed=embed)
                 
                 # Mark the message ID as sent
                 messages_sent[payload.message_id] = sent_message.id
@@ -100,3 +118,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
+                              
