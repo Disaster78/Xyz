@@ -1,4 +1,5 @@
 import discord
+import os
 from discord.ext import commands
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
