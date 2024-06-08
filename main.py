@@ -47,7 +47,6 @@ async def on_raw_reaction_add(payload):
             # Prepare the embed
             embed = discord.Embed(
                 description=f"[Jump to message]({message.jump_url})",
-                color=discord.Color.white()
             )
             embed.add_field(name="Message Content", value=message.content, inline=False)
             
