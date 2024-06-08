@@ -14,6 +14,9 @@ CUSTOM_EMOJI_NAME = 'upvote'  # The name of the custom emoji
 CUSTOM_EMOJI_ID = 1203698304001777714  # The ID of the custom emoji
 TARGET_REACTION_COUNT = 4  # Number of reactions required
 
+# Dictionary to keep track of messages already sent
+messages_sent = {}
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.reactions = True
@@ -42,6 +45,32 @@ async def on_raw_reaction_add(payload):
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
+            # Check if a message has already been sent for this message ID
+            if payload.message_id in messages_sent:
+                # Retrieve the existing message
+                existing_message = await channel.fetch_message(messages_sent[payload.message_id])
+                
+                # Update the existing message
+                embed = existing_message.embeds[0]  # Get the existing embed
+                embed.description = f"[Jump to message]({message.jump_url})"
+                embed.set_footer(
+                    text=message.author.display_name,
+                    icon_url=message.author.avatar.url
+                )
+                
+                # Check for attachments
+                if message.attachments:
+                    # Get the first attachment and set it as the image in the embed
+                    attachment = message.attachments[0]
+                    embed.set_image(url=attachment.url)
+                
+                # Edit the message
+                await existing_message.edit(embed=embed)
+                return
+            
+            # Mark the message ID as sent
+            messages_sent[payload.message_id] = message.id
+            
             # Prepare the embed
             embed = discord.Embed(
                 description=f"[Jump to message]({message.jump_url})",
@@ -61,10 +90,13 @@ async def on_raw_reaction_add(payload):
             
             # Send the message with the emoji and reaction count along with the embed
             target_channel = bot.get_channel(CHANNEL2_ID)
-            await target_channel.send(
-                content=f"{custom_emoji} {reaction.count} in <#{payload.channel_id}>",
+            sent_message = await target_channel.send(
+                content=f"**{custom_emoji} {reaction.count} in <#{payload.channel_id}>**",
                 embed=embed
             )
+            
+            # Mark the message ID as sent
+            messages_sent[payload.message_id] = sent_message.id
             break
 
 # Keep the bot running with keep_alive
@@ -72,4 +104,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-            
+                    
