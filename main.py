@@ -2,6 +2,7 @@ import os
 import discord
 from discord.ext import commands
 from keep_alive import keep_alive  # Import the keep_alive function
+from datetime import datetime
 
 # Access token from environment variable
 TOKEN = os.environ['TOKEN']
@@ -54,8 +55,7 @@ async def on_raw_reaction_add(payload):
                 embed = existing_message.embeds[0]  # Get the existing embed
                 embed.description = f"[Jump to message]({message.jump_url})"
                 embed.set_footer(
-                    text=message.author.display_name,
-                    icon_url=message.author.avatar.url
+                    text=f"Message sent at {message.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
                 )
                 
                 # Check for attachments
@@ -76,10 +76,13 @@ async def on_raw_reaction_add(payload):
                 description=f"[Jump to message]({message.jump_url})",
                 color=discord.Color.from_rgb(255, 255, 255)  # White color
             )
+            embed.set_author(
+                name=message.author.display_name,
+                icon_url=message.author.avatar.url
+            )
             embed.add_field(name="Message Content", value=message.content, inline=False)
             embed.set_footer(
-                text=message.author.display_name,
-                icon_url=message.author.avatar.url
+                text=f"Message sent at {message.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
             )
             
             # Check for attachments
@@ -104,4 +107,3 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-                    
