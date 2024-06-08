@@ -59,33 +59,40 @@ async def on_raw_reaction_add(payload):
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
 
-            # Prepare the embed
-            embed = discord.Embed(
-                description=message.content,
-                color=discord.Color.from_rgb(255, 255, 255)  # White color
-            )
-            embed.set_author(
-                name=message.author.display_name,
-                icon_url=message.author.avatar.url
-            )
-            
-            # Check for attachments
-            if message.attachments:
-                # Get the first attachment and set it as the image in the embed
-                attachment = message.attachments[0]
-                embed.set_image(url=attachment.url)
-            
-            # Send the message with the reaction count along with the embed
-            target_channel = bot.get_channel(CHANNEL2_ID)
-            reaction_info = f"**{reaction.count}** reactions"
-            content = f"{reaction_info}\n{message.jump_url}"
-            sent_message = await target_channel.send(content=content, embed=embed)
-            
-            # Add the message ID to the set of messages sent
-            messages_sent.add(payload.message_id)
+            # Check the reaction count again before sending the message
+            message = await channel.fetch_message(payload.message_id)
+            reaction = discord.utils.get(message.reactions, emoji=custom_emoji)
+            if reaction and reaction.count >= TARGET_REACTION_COUNT:
+                # Prepare the embed
+                embed = discord.Embed(
+                    description=message.content,
+                    color=discord.Color.from_rgb(255, 255, 255)  # White color
+                )
+                embed.set_author(
+                    name=message.author.display_name,
+                    icon_url=message.author.avatar.url
+                )
+                embed.set_footer(
+                    text=f"Message sent at {message.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+                )
+                
+                # Check for attachments
+                if message.attachments:
+                    # Get the first attachment and set it as the image in the embed
+                    attachment = message.attachments[0]
+                    embed.set_image(url=attachment.url)
+                
+                # Send the message with the reaction count along with the embed
+                target_channel = bot.get_channel(CHANNEL2_ID)
+                reaction_info = f"**{custom_emoji} {reaction.count}** in **<#{payload.channel_id}>**"
+                sent_message = await target_channel.send(content=reaction_info, embed=embed)
+                
+                # Add the message ID to the set of messages sent
+                messages_sent.add(payload.message_id)
 
 # Keep the bot running with keep_alive
 keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
+            
