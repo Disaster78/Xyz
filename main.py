@@ -57,7 +57,7 @@ async def on_raw_reaction_add(payload):
                 return
 
             # Wait for a short delay before sending the message
-            await asyncio.sleep(7)  # Adjust the delay time as needed
+            await asyncio.sleep(5)  # Adjust the delay time as needed
 
             # Check the reaction count again before sending the message
             message = await channel.fetch_message(payload.message_id)
