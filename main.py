@@ -17,8 +17,8 @@ CUSTOM_EMOJI_NAME = 'upvote'  # The name of the custom emoji
 CUSTOM_EMOJI_ID = 1203698304001777714  # The ID of the custom emoji
 TARGET_REACTION_COUNT = 4  # Number of reactions required
 
-# Dictionary to keep track of highest reaction counts processed for each message
-messages_sent = {}
+# Unique marker reaction to indicate a message has been processed
+MARKER_EMOJI = '✅'  # You can use any emoji as a marker
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -49,13 +49,14 @@ async def on_raw_reaction_add(payload):
         logger.error("Custom emoji not found")
         return
 
+    # Check if the marker reaction is already present
+    for reaction in message.reactions:
+        if str(reaction.emoji) == MARKER_EMOJI:
+            return
+
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
-            # Check if a message has already been sent for this message ID and if the count has changed
-            if payload.message_id in messages_sent and messages_sent[payload.message_id] >= reaction.count:
-                return
-
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
 
@@ -85,14 +86,14 @@ async def on_raw_reaction_add(payload):
                 # Send the message with the reaction count along with the embed
                 target_channel = bot.get_channel(CHANNEL2_ID)
                 reaction_info = f"**{custom_emoji} {reaction.count}** in **<#{payload.channel_id}>**"
-                sent_message = await target_channel.send(content=reaction_info, embed=embed)
+                await target_channel.send(content=reaction_info, embed=embed)
                 
-                # Update the highest reaction count processed for this message
-                messages_sent[payload.message_id] = reaction.count
+                # Add the marker reaction to indicate the message has been processed
+                await message.add_reaction(MARKER_EMOJI)
 
 # Keep the bot running with keep_alive
 keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-            
+    
