@@ -17,8 +17,8 @@ CUSTOM_EMOJI_NAME = 'upvote'  # The name of the custom emoji
 CUSTOM_EMOJI_ID = 1203698304001777714  # The ID of the custom emoji
 TARGET_REACTION_COUNT = 4  # Number of reactions required
 
-# Set to keep track of messages already sent
-messages_sent = set()
+# Dictionary to keep track of highest reaction counts processed for each message
+messages_sent = {}
 
 # Configure logging
 logging.basicConfig(level=logging.ERROR)
@@ -52,12 +52,12 @@ async def on_raw_reaction_add(payload):
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
-            # Check if a message has already been sent for this message ID
-            if payload.message_id in messages_sent:
+            # Check if a message has already been sent for this message ID and if the count has changed
+            if payload.message_id in messages_sent and messages_sent[payload.message_id] >= reaction.count:
                 return
 
             # Wait for a short delay before sending the message
-            await asyncio.sleep(5)  # Adjust the delay time as needed
+            await asyncio.sleep(7)  # Adjust the delay time as needed
 
             # Check the reaction count again before sending the message
             message = await channel.fetch_message(payload.message_id)
@@ -87,8 +87,8 @@ async def on_raw_reaction_add(payload):
                 reaction_info = f"**{custom_emoji} {reaction.count}** in **<#{payload.channel_id}>**"
                 sent_message = await target_channel.send(content=reaction_info, embed=embed)
                 
-                # Add the message ID to the set of messages sent
-                messages_sent.add(payload.message_id)
+                # Update the highest reaction count processed for this message
+                messages_sent[payload.message_id] = reaction.count
 
 # Keep the bot running with keep_alive
 keep_alive()
