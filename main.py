@@ -71,7 +71,7 @@ async def on_raw_reaction_add(payload):
                 # Prepare the embed
                 embed = discord.Embed(
                     description=message.content,
-                    color=discord.Color.from_rgb(50, 205, 50)  # White color
+                    color=discord.Color.from_rgb(0, 255, 0)  # lime color
                 )
                 embed.set_author(
                     name=message.author.display_name,
