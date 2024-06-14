@@ -73,6 +73,7 @@ async def on_raw_reaction_add(payload):
                     color=discord.Color.from_rgb(255, 255, 255)  # White color
                 )
                 embed.add_field(
+                    name="Content",
                     value=message.content,
                     inline=False
                 )
@@ -110,6 +111,7 @@ async def test(ctx):
         color=discord.Color.from_rgb(255, 255, 255)  # White color
     )
     embed.add_field(
+        name="Content",
         value=ctx.message.content,
         inline=False
     )
