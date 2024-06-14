@@ -57,7 +57,7 @@ async def on_raw_reaction_add(payload):
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
-            # Check if a message has already been sent for this message I
+            # Check if a message has already been sent for this message ID
 
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
@@ -68,12 +68,9 @@ async def on_raw_reaction_add(payload):
             if reaction and reaction.count >= TARGET_REACTION_COUNT:
                 # Prepare the embed
                 embed = discord.Embed(
-                    description=message.content,
-                    color=discord.Color.from_rgb(0, 255, 0)  # lime color
-                )
-                embed.set_author(
-                    name=message.author.display_name,
-                    icon_url=message.author.avatar.url
+                    title="Message",
+                    description=f"[Go to message!]({message.jump_url})",
+                    color=discord.Color.from_rgb(255, 255, 255)  # White color
                 )
                 timestamp = message.created_at.strftime('%m/%d/%Y %I:%M %p')
                 embed.set_footer(
@@ -86,17 +83,33 @@ async def on_raw_reaction_add(payload):
                     attachment = message.attachments[0]
                     embed.set_image(url=attachment.url)
                 
-                # Send the message with the reaction count along with the embed
+                # Send the embed with the reaction info
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                reaction_info = f"**{custom_emoji} {reaction.count} [Jump To Message]({message.jump_url}**)"
-                sent_message = await target_channel.send(content=reaction_info, embed=embed)
+                reaction_info = f"**{custom_emoji} {reaction.count}**)"
+                await target_channel.send(content=reaction_info, embed=embed)
                 
                 # Add the marker reaction to indicate the message has been processed
                 await message.add_reaction(MARKER_EMOJI)
+
+@bot.command()
+async def test(ctx):
+    # Test command to send the same embed with the reaction info
+    embed = discord.Embed(
+        title="Message",
+        description=f"[Go to message!](https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{ctx.message.id})",
+        color=discord.Color.from_rgb(255, 255, 255)  # White color
+    )
+    timestamp = datetime.utcnow().strftime('%m/%d/%Y %I:%M %p')
+    embed.set_footer(
+        text=f"{timestamp} | in #{ctx.channel.name}"
+    )
+    
+    reaction_info = f"**{CUSTOM_EMOJI_NAME} 4** [Jump To Message](https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{ctx.message.id})"
+    await ctx.send(content=reaction_info, embed=embed)
 
 # Keep the bot running with keep_alive
 keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-    
+            
