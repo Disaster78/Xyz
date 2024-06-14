@@ -85,7 +85,7 @@ async def on_raw_reaction_add(payload):
                 
                 # Send the message with the reaction count along with the embed
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                reaction_info = f"**{custom_emoji} {reaction.count}** in **<#{payload.channel_id}>**"
+                reaction_info = f"**{custom_emoji} {reaction.count}** {message.jump_url}"
                 await target_channel.send(content=reaction_info, embed=embed)
                 
                 # Add the marker reaction to indicate the message has been processed
@@ -96,4 +96,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-    
+        
