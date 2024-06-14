@@ -15,7 +15,7 @@ CHANNEL2_ID = 1203597259774885908  # Channel where embeds are sent
 # Custom emoji details and the required number of reactions
 CUSTOM_EMOJI_NAME = 'upvote'  # The name of the custom emoji
 CUSTOM_EMOJI_ID = 1203698304001777714  # The ID of the custom emoji
-TARGET_REACTION_COUNT = 4  # Number of reactions required
+TARGET_REACTION_COUNT = 1 # Number of reactions required
 
 # Unique marker reaction to indicate a message has been processed
 MARKER_EMOJI = '✅'  # You can use any emoji as a marker
