@@ -57,6 +57,10 @@ async def on_raw_reaction_add(payload):
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
+            # Check if a message has already been sent for this message ID
+            if payload.message_id in messages_sent:
+                return
+
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
 
@@ -67,14 +71,15 @@ async def on_raw_reaction_add(payload):
                 # Prepare the embed
                 embed = discord.Embed(
                     description=message.content,
-                    color=discord.Color.from_rgb(255, 255, 255)  # White color
+                    color=discord.Color.from_rgb(50, 205, 50)  # White color
                 )
                 embed.set_author(
                     name=message.author.display_name,
                     icon_url=message.author.avatar.url
                 )
+                timestamp = message.created_at.strftime('%m/%d/%Y %I:%M %p')
                 embed.set_footer(
-                    text=f"Message sent at {message.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+                    text=f"{timestamp} | In #{channel.name}"
                 )
                 
                 # Check for attachments
@@ -85,8 +90,8 @@ async def on_raw_reaction_add(payload):
                 
                 # Send the message with the reaction count along with the embed
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                reaction_info = f"**{custom_emoji} {reaction.count}** {message.jump_url}"
-                await target_channel.send(content=reaction_info, embed=embed)
+                reaction_info = f"**{custom_emoji} {reaction.count} [Jump To Message]({message.jump_url}**)"
+                sent_message = await target_channel.send(content=reaction_info, embed=embed)
                 
                 # Add the marker reaction to indicate the message has been processed
                 await message.add_reaction(MARKER_EMOJI)
@@ -96,4 +101,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-        
+    
