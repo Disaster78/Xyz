@@ -96,7 +96,7 @@ async def on_raw_reaction_add(payload):
                 
                 # Send the embed with the reaction info
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                reaction_info = f"**:{CUSTOM_EMOJI_NAME}: {reaction.count}**"
+                reaction_info = f"**{custom_emoji} {reaction.count}**"
                 await target_channel.send(content=reaction_info, embed=embed)
                 
                 # Add the marker reaction to indicate the message has been processed
@@ -126,7 +126,7 @@ async def test(ctx):
         icon_url=ctx.author.avatar.url
     )
     
-    reaction_info = f"**:{CUSTOM_EMOJI_NAME}: 4**"
+    reaction_info = f"**{custom_emoji} {reaction.count} 4**"
     await ctx.send(content=reaction_info, embed=embed)
 
 # Keep the bot running with keep_alive
