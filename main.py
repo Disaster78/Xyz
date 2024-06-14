@@ -58,6 +58,8 @@ async def on_raw_reaction_add(payload):
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
             # Check if a message has already been sent for this message ID
+            if payload.message_id in messages_sent:
+                return
 
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
@@ -72,9 +74,19 @@ async def on_raw_reaction_add(payload):
                     description=f"[Go to message!]({message.jump_url})",
                     color=discord.Color.from_rgb(255, 255, 255)  # White color
                 )
+                embed.add_field(
+                    value=message.content,
+                    inline=False
+                )
                 timestamp = message.created_at.strftime('%m/%d/%Y %I:%M %p')
                 embed.set_footer(
                     text=f"{timestamp} | In #{channel.name}"
+                )
+                
+                # Set the author and author icon URL based on the original message's author
+                embed.set_author(
+                    name=message.author.display_name,
+                    icon_url=message.author.avatar.url
                 )
                 
                 # Check for attachments
@@ -85,7 +97,7 @@ async def on_raw_reaction_add(payload):
                 
                 # Send the embed with the reaction info
                 target_channel = bot.get_channel(CHANNEL2_ID)
-                reaction_info = f"**{custom_emoji} {reaction.count}**)"
+                reaction_info = f"**{custom_emoji} {reaction.count}**"
                 await target_channel.send(content=reaction_info, embed=embed)
                 
                 # Add the marker reaction to indicate the message has been processed
@@ -99,12 +111,22 @@ async def test(ctx):
         description=f"[Go to message!](https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{ctx.message.id})",
         color=discord.Color.from_rgb(255, 255, 255)  # White color
     )
+    embed.add_field(
+        value=ctx.message.content,
+        inline=False
+    )
     timestamp = datetime.utcnow().strftime('%m/%d/%Y %I:%M %p')
     embed.set_footer(
-        text=f"{timestamp} | in #{ctx.channel.name}"
+        text=f"{timestamp} | In #{ctx.channel.name}"
     )
     
-    reaction_info = f"**{CUSTOM_EMOJI_NAME} 4** [Jump To Message](https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{ctx.message.id})"
+    # Set the author and author icon URL based on the original message's author
+    embed.set_author(
+        name=ctx.author.display_name,
+        icon_url=ctx.author.avatar.url
+    )
+    
+    reaction_info = f"**{custom_emoji} 4**"
     await ctx.send(content=reaction_info, embed=embed)
 
 # Keep the bot running with keep_alive
@@ -112,4 +134,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-            
+    
