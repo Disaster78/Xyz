@@ -57,7 +57,9 @@ async def on_raw_reaction_add(payload):
     # Check if the reaction is the target custom emoji
     for reaction in message.reactions:
         if reaction.emoji == custom_emoji and reaction.count >= TARGET_REACTION_COUNT:
-            # Check if a message has already been sent for this mes
+            # Check if a message has already been sent for this message ID
+            if payload.message_id in messages_sent:
+                return
 
             # Wait for a short delay before sending the message
             await asyncio.sleep(7)  # Adjust the delay time as needed
@@ -134,4 +136,4 @@ keep_alive()
 
 # Run the bot
 bot.run(TOKEN)
-    
+        
